@@ -1,5 +1,4 @@
 import { connectDB } from "@/lib/db";
-import { cookies } from "next/headers";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -32,18 +31,28 @@ export async function POST(req) {
   }
 
   const token = jwt.sign(
-    { userId: user._id, email: user.email },
-    process.env.JWT_SECRET,
-    { expiresIn: "1h" }
-  );
-  const cookieStore = await cookies();
+  {
+    userId: user._id,
+    email: user.email,
+  },
+  process.env.JWT_SECRET,
+  {
+    expiresIn: "1h",
+  }
+);
 
-  cookieStore.set("token", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    path: "/",
-    maxAge: 60 * 60,
-  });
+const response = NextResponse.json({
+  message: "Login successful",
+});
+
+response.cookies.set("token", token, {
+  httpOnly: true,
+  secure: false,
+  sameSite: "lax",
+  path: "/",
+  maxAge: 60 * 60,
+});
+
+return response;
   return Response.json({ message: "Login successful" });
 }
