@@ -10,7 +10,7 @@ export default function RegisterPage() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [errors, setErrors] = useState({});
+    const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string }>({});
     const [message, setMessage] = useState("");
 
     const handleRegister = async() => {
@@ -24,33 +24,34 @@ export default function RegisterPage() {
             return;
         }
          try {
-    const res = await registerUser(data);
-setMessage(res.message);
-  } catch (err) {
-    setMessage(err.message);
-  }
+            const res = await registerUser(data);
+            setMessage(res.message);
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setMessage(err.message);
+            } else {
+                setMessage(String(err));
+            }
+        }
     };
 
-    useEffect(() => {
-        const validationErrors = validateRegister({ name, email, password });
-        if (name || email || password) {
-            setErrors(validationErrors);
-        }
-    }, [name, email, password]);
 
     return (
-        <div className="flex justify-center items-center h-screen">
-            <div className="border p-6 rounded w-80">
+<div className="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-lg">            <div className="border p-6 rounded w-80">
                 <h2 className="text-xl mb-4">Register</h2>
 
-                <Input
+<input
+  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
+
                     placeholder="Enter name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                 />
                 {errors.name && <p className="text-red-500">{errors.name}</p>}
 
-                <Input
+               <input
+  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
+
                     type="email"
                     placeholder="Enter email"
                     value={email}
@@ -58,7 +59,9 @@ setMessage(res.message);
                 />
                 {errors.email && <p className="text-red-500">{errors.email}</p>}
 
-                <Input
+               <input
+  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
+
                     type="password"
                     placeholder="Enter password"
                     value={password}
@@ -67,7 +70,13 @@ setMessage(res.message);
                 {errors.password && <p className="text-red-500">{errors.password}</p>}
 
 
-                <Button text="Register" onClick={handleRegister} disabled={!name || !email || !password} />
+                <button
+                    className="w-full bg-black text-white py-3 rounded-lg hover:opacity-90 transition"
+                    onClick={handleRegister}
+                    disabled={!name || !email || !password}
+                >
+                    Register
+                </button>
             </div>
         </div>
     );

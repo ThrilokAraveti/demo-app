@@ -1,4 +1,5 @@
 import { connectDB } from "@/lib/db";
+import { cookies } from "next/headers";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -25,12 +26,24 @@ export async function POST(req) {
     return Response.json({ message: "Invalid credentials" }, { status: 401 });
   }
 
-    // 🔐 Generate JWT
+  // 🔐 Generate JWT
+  if (!process.env.JWT_SECRET) {
+    return Response.json({ message: "Server configuration error" }, { status: 500 });
+  }
+
   const token = jwt.sign(
     { userId: user._id, email: user.email },
     process.env.JWT_SECRET,
     { expiresIn: "1h" }
   );
+  const cookieStore = await cookies();
 
-  return Response.json({ message: "Login successful", token });
+  cookieStore.set("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/",
+    maxAge: 60 * 60,
+  });
+  return Response.json({ message: "Login successful" });
 }
