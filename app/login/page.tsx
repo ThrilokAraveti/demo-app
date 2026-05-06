@@ -13,7 +13,6 @@ export default function LoginPage() {
     const router = useRouter();
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [message, setMessage] = useState<string>("");
-
 const handleLogin = async () => {
   try {
     const res = await fetch("/api/login", {
@@ -32,6 +31,8 @@ const handleLogin = async () => {
     console.log(result);
 
     if (res.ok) {
+      console.log("Login success");
+
       router.push("/dashboard");
     } else {
       alert(result.message);
