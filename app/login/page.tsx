@@ -33,7 +33,7 @@ const handleLogin = async () => {
     if (res.ok) {
       console.log("Login success");
 
-      router.push("/dashboard");
+       window.location.href = "/dashboard";
     } else {
       alert(result.message);
     }
