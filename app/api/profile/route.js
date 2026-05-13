@@ -1,5 +1,7 @@
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
+import { connectDB } from "@/lib/db";
+import User from "@/models/User";
 
 export async function GET() {
   const cookieStore = await cookies();
@@ -19,10 +21,28 @@ export async function GET() {
       process.env.JWT_SECRET
     );
 
+    await connectDB();
+
+    const storedUser = await User.findById(decoded.userId).select(
+      "name email role"
+    );
+
+    if (!storedUser) {
+      return Response.json(
+        { message: "User not found" },
+        { status: 404 }
+      );
+    }
+
     return Response.json({
-      user: decoded,
+      user: {
+        userId: String(storedUser._id),
+        name: storedUser.name,
+        email: storedUser.email,
+        role: storedUser.role || decoded.role || "customer",
+      },
     });
-  } catch (err) {
+  } catch {
     return Response.json(
       { message: "Invalid token" },
       { status: 401 }

@@ -1,5 +1,18 @@
 "use client";
 
+/**
+ * @typedef {import("react").ChangeEvent<HTMLInputElement>} InputChangeEvent
+ * @typedef {{
+ *   type?: string;
+ *   placeholder?: string;
+ *   value: string;
+ *   onChange: (event: InputChangeEvent) => void;
+ * }} InputProps
+ */
+
+/**
+ * @param {InputProps} props
+ */
 export default function Input({ type = "text", placeholder, value, onChange }) {
   return (
     <input

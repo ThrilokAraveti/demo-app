@@ -31,10 +31,12 @@ export async function POST(req) {
     return Response.json({ message: "Server configuration error" }, { status: 500 });
   }
 
-  const token = jwt.sign(
+const token = jwt.sign(
   {
     userId: user._id,
+    name: user.name,
     email: user.email,
+    role: user.role || "customer",
   },
   process.env.JWT_SECRET,
   {
