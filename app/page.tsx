@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Image from "next/image";
 
 const carouselSlides = [
@@ -42,15 +44,32 @@ const carouselSlides = [
 ];
 
 export default function HomePage() {
+  const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
+    async function redirectToDashboard() {
+      try {
+        const res = await fetch("/api/profile", { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          router.replace(
+            data.user?.role === "admin" ? "/dashboard/admin" : "/dashboard/user"
+          );
+        }
+      } catch {
+        // ignore errors and keep showing the landing page
+      }
+    }
+
+    redirectToDashboard();
+
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % carouselSlides.length);
     }, 5000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [router]);
 
   const goToSlide = (index: number) => {
     setCurrentSlide(index);
@@ -97,7 +116,7 @@ export default function HomePage() {
         </div>
 
         <div className="mx-auto w-full max-w-6xl rounded-[2rem] border border-white/10 bg-black/50 p-6 shadow-2xl shadow-black/40 backdrop-blur sm:p-8 lg:p-10">
-          <div className="grid gap-8 xl:grid-cols-[1.3fr_0.7fr]">
+          <div className="grid gap-8">
             <div className="flex flex-col justify-between rounded-3xl border border-white/10 bg-white/5 p-6 text-white">
               <div>
                 <span className="inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-medium tracking-[0.18em] text-white/80">
@@ -139,17 +158,6 @@ export default function HomePage() {
                       aria-label={`Go to slide ${index + 1}`}
                     />
                   ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-[1.75rem] bg-gradient-to-br from-slate-950/80 via-slate-900/80 to-slate-800/90 p-6 text-white shadow-2xl shadow-slate-950/40 ring-1 ring-white/10">
-              <div className="rounded-[1.5rem] bg-white/5 p-6 text-center">
-                <p className="text-xs uppercase tracking-[0.2em] text-blue-200/80">
-                  South India map showcase
-                </p>
-                <div className="mt-6 flex h-72 items-center justify-center rounded-3xl bg-white/5 text-white">
-                  <span className="text-sm text-white/70">Carousel visual panel</span>
                 </div>
               </div>
             </div>

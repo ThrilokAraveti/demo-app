@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 const carouselSlides = [
@@ -63,10 +64,29 @@ function ChevronIcon({ direction }: { direction: "left" | "right" }) {
 }
 
 export default function HomePage() {
+  const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoplay, setIsAutoplay] = useState(true);
 
   useEffect(() => {
+    async function redirectToDashboard() {
+      try {
+        const res = await fetch("/api/profile", { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          router.replace(
+            data.user?.role === "admin" ? "/dashboard/admin" : "/dashboard/user"
+          );
+        }
+      } catch {
+        // ignore and continue showing public home content
+      }
+    }
+
+    redirectToDashboard();
+  }, [router]);
+
+  useEffect(() => { 
     if (!isAutoplay) return;
 
     const timer = setInterval(() => {

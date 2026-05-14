@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { validateRegister } from "@/lib/validator";
@@ -43,6 +43,24 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState<RegisterErrors>({});
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    async function redirectIfAuthenticated() {
+      try {
+        const res = await fetch("/api/profile", { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          router.replace(
+            data.user?.role === "admin" ? "/dashboard/admin" : "/dashboard/user"
+          );
+        }
+      } catch {
+        // remain on registration page
+      }
+    }
+
+    redirectIfAuthenticated();
+  }, [router]);
 
   const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

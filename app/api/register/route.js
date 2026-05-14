@@ -1,47 +1,50 @@
+import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import { addUser, findUserByEmail } from "@/lib/users";
+import { cleanText, normalizeEmail } from "@/lib/auth";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 
 export async function POST(req) {
-  console.log("REGISTER HIT");
-await connectDB();
-console.log("DB CONNECTED");
+  await connectDB();
+
   const body = await req.json();
-  const { name, email, password } = body;
+  const name = cleanText(body.name, 80);
+  const email = normalizeEmail(body.email);
+  const password = String(body.password || "");
 
   if (!name || !email || !password) {
-    return Response.json(
+    return NextResponse.json(
       { message: "All fields required" },
       { status: 400 }
     );
   }
 
-  const existingUser = findUserByEmail(email);
+  if (!/\S+@\S+\.\S+/.test(email) || password.length < 6) {
+    return NextResponse.json(
+      { message: "Invalid registration details" },
+      { status: 400 }
+    );
+  }
+
+  const existingUser = await User.findOne({ email }).select("_id");
+
   if (existingUser) {
-    return Response.json(
+    return NextResponse.json(
       { message: "User already exists" },
       { status: 400 }
     );
   }
 
-  // 🔐 HASH PASSWORD
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  addUser({
+  await User.create({
     name,
     email,
     password: hashedPassword,
+    role: "customer",
   });
 
-  const newUser = await User.create({
-  name,
-  email,
-  password: hashedPassword,
-});
-
-console.log("Saved user:", newUser);
-  return Response.json({
+  return NextResponse.json({
     message: "User registered successfully",
   });
 }

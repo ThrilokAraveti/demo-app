@@ -4,6 +4,7 @@ export const loginUser = async (data) => {
     headers: {
       "Content-Type": "application/json",
     },
+    credentials: "include",
     body: JSON.stringify(data),
   });
 
@@ -22,6 +23,7 @@ export const registerUser = async (data) => {
     headers: {
       "Content-Type": "application/json",
     },
+    credentials: "include",
     body: JSON.stringify(data),
   });
 
@@ -30,6 +32,8 @@ export const registerUser = async (data) => {
   if (!res.ok) {
     throw new Error(result.message);
   }
+
+  console.log("FINAL ROLE:", result);
 
   return result;
 };

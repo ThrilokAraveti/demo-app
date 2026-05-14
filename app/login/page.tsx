@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { validateLogin } from "@/lib/validator";
 import { loginUser } from "@/services/authService";
@@ -42,6 +42,24 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    async function redirectIfAuthenticated() {
+      try {
+        const res = await fetch("/api/profile", { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          router.replace(
+            data.user?.role === "admin" ? "/dashboard/admin" : "/dashboard/user"
+          );
+        }
+      } catch {
+        // remain on login page
+      }
+    }
+
+    redirectIfAuthenticated();
+  }, [router]);
+
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -65,7 +83,9 @@ export default function LoginPage() {
     try {
       const result = await loginUser(data);
       setMessage(result.message || "Login successful");
-      router.push("/dashboard");
+      router.push(
+        result.user?.role === "admin" ? "/dashboard/admin" : "/dashboard/user"
+      );
     } catch (error: unknown) {
       if (error instanceof Error) {
         setMessage(error.message);
