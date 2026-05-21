@@ -2,6 +2,7 @@ import "./globals.css";
 import type { ReactNode } from "react";
 import Navbar from "@/components/Navbar";
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 
 
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <main className="max-w-5xl mx-auto p-6">
           {children}
         </main>
+        <Analytics />
       </body>
     </html>
   );
