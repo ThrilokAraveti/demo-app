@@ -1,6 +1,13 @@
 import "./globals.css";
 import type { ReactNode } from "react";
 import Navbar from "@/components/Navbar";
+import type { Metadata } from "next";
+
+
+export const metadata: Metadata = {
+  title: "Thinnava",
+  description: "Order Food Online with Thinnava - Your Ultimate Food Delivery App",
+};
 
 type RootLayoutProps = {
   children: ReactNode;
